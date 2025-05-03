@@ -366,8 +366,13 @@ reduction_T *row_reduce(matrix_T *a) {
           copy_vals[i] = rows[num_pivots]->nums[i];
         }
         copy = create_vector(a->cols, copy_vals);
+        free_ptr = copy;
         copy = vector_mult_c(copy, scale);
-        rows[j] = vector_add(rows[j], vector_mult_c(copy, -1));
+        free_vector(free_ptr);
+        free_ptr = copy;
+        copy = vector_mult_c(copy, -1);
+        free_vector(free_ptr);
+        rows[j] = vector_add(rows[j], copy);
         free_vector(copy);
       }
       else {
