@@ -5,13 +5,11 @@
 
 int main() {
   matrix_T *a = NULL;
-  matrix_T *b = NULL;
+  FILE *fp = fopen("input.txt", "r");
 
-  double val[9] = {3, 1, 6, -6, 0, -16, 0, 8, -17};
-  vector_T *vec = create_vector(9, val);
-  a = create_matrix(3, 3, vec);
-  double det = determinant(a);
-  printf("Determinant: :%lf\n", det);
+  a = read_matrix(fp);
+
+  print_lu(lu_decomposition(a));
 
   free_matrix(a);
   return 0;

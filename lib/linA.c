@@ -46,6 +46,32 @@ matrix_T *create_matrix(int rows, int cols, vector_T *vec) {
   return new;
 }
 
+matrix_T *read_matrix(FILE *fp) {
+  assert(fp != NULL);
+  
+  int row = 0;
+  int col = 0;
+
+  fscanf(fp, "%d,%d\n", &row, &col);
+
+  double *vals = malloc(sizeof(double) * row * col);
+
+  for (int i = 0; i < row * col; i++) {
+    fscanf(fp, "%lf", &vals[i]);
+    if (i == row * col - 1) {
+      fscanf(fp, "\n");
+    }
+    else {
+      fscanf(fp, ",");
+    }
+  }
+  vector_T *vec = create_vector(row * col, vals);
+  matrix_T *matrix = create_matrix(row, col, vec);
+  return matrix;
+}
+
+
+
 matrix_T *create_identity_matrix(int size) {
   if (size <= 0) {
     fprintf(stderr, "Invalid dimensions in create_identity_matrix\n");
@@ -255,6 +281,7 @@ reduction_T *row_reduce(matrix_T *a) {
   assert(a != NULL);
 
   int sign = 1;
+  bool is_swapped = false;
 
   reduction_T *reduction_info = malloc(sizeof(reduction_T));
   int num_ks = 0;
@@ -306,7 +333,7 @@ reduction_T *row_reduce(matrix_T *a) {
     
     /* if the ith col is in form, we go to the next col */
     if (zeros) {
-      if (rows[num_pivots]->nums[i] != 0) {
+      if (num_pivots < a->rows && rows[num_pivots]->nums[i] != 0) {
         num_pivots++;
       }
       continue;
@@ -319,6 +346,7 @@ reduction_T *row_reduce(matrix_T *a) {
       rows[num_pivots] = rows[index];
       rows[index] = temp;
       sign *= -1;
+      is_swapped = true;
     }
 
     /* now we can just row reduce below the pivot */
@@ -374,7 +402,8 @@ reduction_T *row_reduce(matrix_T *a) {
   reduction_info->matrix = new_matrix;
   reduction_info->sign = sign;
   reduction_info->num_ks = index_k;
-  
+  reduction_info->swapped = is_swapped;
+
   return reduction_info;
 }
 
@@ -394,12 +423,61 @@ double determinant(matrix_T *a) {
     det *= rrm->vals->nums[index];
   }
   int sign = info->sign;
-  printf("Num: %d\n", info->num_ks);
-  for (int i = 0; i < info->num_ks; i++) {
-    printf("%lf\n", info->ks[i]);
-  }
+  free(info->matrix);
+  free(info->ks);
+  free(info);
   return det * sign;
 }
+
+lu_decomposition_T *lu_decomposition(matrix_T *a) {
+  assert(a != NULL);
+
+  reduction_T *red_info = row_reduce(a);
+
+  if (red_info->swapped) {
+    fprintf(stderr, "A pure LU decomposition doesn't exist\n");
+    return NULL;
+  }
+
+  lu_decomposition_T *sol = malloc(sizeof(lu_decomposition_T));
+  sol->upper = red_info->matrix;
+  
+  double *vals = calloc(1, a->rows * a->rows * sizeof(double));
+
+  /* insert ones on diagnal */
+
+  for (int i = 0; i < a->rows; i++) {
+    int index = i + i * a->rows;
+    vals[index] = 1;
+  }
+
+  /* insert k values below */
+  int k_index = 0;
+
+  for (int i = 0; i < a->rows; i++) {
+    for (int j = i + 1; j < a->rows; j++) {
+      int row_index = j * a->rows;
+      vals[row_index + i] = red_info->ks[k_index];
+      k_index++;
+    }
+  }
+  vector_T *vec = create_vector(a->rows * a->rows, vals);
+  matrix_T *lower = create_matrix(a->rows, a->rows, vec);
+  sol->lower = lower;
+  free(red_info->ks);
+  free(red_info);
+  return sol;
+}
+
+void print_lu(lu_decomposition_T *a) {
+  assert(a != NULL);
+  printf("Lower:\n");
+  print_matrix(a->lower);
+  printf("Upper:\n");
+  print_matrix(a->upper);
+}
+
+
 
 
 /* basic vector functions below */
