@@ -521,7 +521,7 @@ vector_T *vector_mult_c(vector_T *a, double c) {
 
 double magnitude(vector_T *a) {
   assert(a != NULL);
-  int sum = 0;
+  double sum = 0;
   for (int i = 0; i < a->size; i++) {
     sum += a->nums[i] * a->nums[i];
   }

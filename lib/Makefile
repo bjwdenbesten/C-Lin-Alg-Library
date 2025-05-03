@@ -1,8 +1,21 @@
-CC=gcc
-CFLAGS = -Werror -Wall
+CC = gcc
+CFLAGS = -Wall -Wextra -I./src
 
-test: linA.c main.c
-	$(CC) -o test linA.c main.c
+SRCDIR = src
+SRC = $(SRCDIR)/main.c $(SRCDIR)/linA.c
+OBJ = $(SRC:.c=.o)
+
+TARGET = main
+
+all: $(TARGET)
+
+# Link objs together
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET)
+
+# c -> o
+$(SRCDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm test
+	rm -f $(SRCDIR)/*.o $(TARGET)
