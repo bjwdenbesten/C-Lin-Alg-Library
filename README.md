@@ -21,7 +21,7 @@ provided in input.txt, as well as a sample program in main.c.</p>
 * <code>matrix_mult_c</code> computes the product of a matrix and a constant. <br \>
 * <code>matrix_mult</code> computes the product of two matrices. <br \>
 * <code>transpose</code> computes the transpose of a matrix. <br \>
-* <code>row_reduce</code> row reduces a given matrix. Returns a structure lu_decomposition_T, containing info about the row reduction. <br \>
+* <code>row_reduce</code> row reduces a given matrix. Returns a structure reduction_T, containing info about the row reduction. <br \>
 * <code>determinant</code> computes the determinant of a given matrix. <br \>
 * <code>lu_decomposition</code> computes the LU(P) decomposition of a given matrix. <br \>
 <h4>Important</h4>
