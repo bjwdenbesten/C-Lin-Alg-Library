@@ -4,6 +4,8 @@
 #ifndef linA_H__
 #define linA_H__
 
+#define ERROR (0)
+
 typedef struct {
   int size;
   double *nums;
@@ -19,6 +21,8 @@ typedef struct {
   matrix_T *matrix;
   int sign;
   bool swapped;
+  int *swaps;
+  int num_swaps;
   int num_ks;
   double *ks;
 } reduction_T;
@@ -26,6 +30,7 @@ typedef struct {
 typedef struct {
   matrix_T *upper;
   matrix_T *lower;
+  matrix_T *P;
 } lu_decomposition_T;
 
 
@@ -49,6 +54,7 @@ reduction_T *row_reduce(matrix_T *);
 double determinant(matrix_T *);
 lu_decomposition_T *lu_decomposition(matrix_T *);
 void print_lu(lu_decomposition_T *);
+void swap(matrix_T *, int, int);
 
 
 /* vector operation functions */

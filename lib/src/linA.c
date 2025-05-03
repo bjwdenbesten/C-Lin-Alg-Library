@@ -15,11 +15,16 @@ vector_T *create_vector(int size, double *nums) {
   }
 
   vector_T *new = malloc(sizeof(vector_T));
-  assert(new != NULL);
+  if (new == NULL) {
+    fprintf(stderr, "Malloc error in create_vector\n");
+    return NULL;
+  }
 
   new->size = size;
   new->nums = malloc(sizeof(double) * size);
-  assert(new->nums != NULL);
+  if (new->nums == NULL) {
+    fprintf(stderr, "Malloc error in create-vector\n");
+  }
 
   if (nums != NULL) {
     for (int i = 0; i < size; i++) {
@@ -38,7 +43,9 @@ matrix_T *create_matrix(int rows, int cols, vector_T *vec) {
   }
 
   matrix_T *new = malloc(sizeof(matrix_T));
-  assert(new != NULL);
+  if (new == NULL) {
+    fprintf(stderr, "Malloc error in create_matrix\n");
+  }
 
   new->rows = rows;
   new->cols = cols;
@@ -47,7 +54,10 @@ matrix_T *create_matrix(int rows, int cols, vector_T *vec) {
 }
 
 matrix_T *read_matrix(FILE *fp) {
-  assert(fp != NULL);
+  if (fp == NULL) {
+    fprintf(stderr, "Specified file pointer is null\n");
+    return NULL;
+  }
   
   int row = 0;
   int col = 0;
@@ -79,13 +89,19 @@ matrix_T *create_identity_matrix(int size) {
   }
 
   matrix_T *new = malloc(sizeof(matrix_T));
-  assert(new != NULL);
+  if (new == NULL) {
+    fprintf(stderr, "Malloc error in create identity matrix\n");
+    return NULL;
+  }
 
   new->rows = size;
   new->cols = size;
 
   double *i_v = malloc(sizeof(double) * size * size);
-  assert(i_v != NULL);
+  if (i_v == NULL) {
+    fprintf(stderr, "Malloc error in create identity matrix\n");
+    return NULL;
+  }
 
   for (int i = 0; i < size * size; i++) {
     if (i % (size + 1) == 0) {
@@ -111,7 +127,10 @@ matrix_T *create_zero_matrix(int rows, int cols) {
   }
 
   matrix_T *new = malloc(sizeof(matrix_T));
-  assert(new != NULL);
+  if (new == NULL) {
+    fprintf(stderr, "Malloc error in create zero matrix\n");
+    return NULL;
+  }
   new->rows = rows;
   new->cols = cols;
 
@@ -128,7 +147,10 @@ matrix_T *create_zero_matrix(int rows, int cols) {
 
 /* frees a matrix object and its data */
 void free_matrix(matrix_T *m) {
-  assert(m != NULL);
+  if (m == NULL) {
+    fprintf(stderr, "Cannot free null matrix\n");
+    return;
+  }
   free(m->vals->nums);
   free(m->vals);
   free(m);
@@ -137,7 +159,10 @@ void free_matrix(matrix_T *m) {
 
 /* prints matrix to stdout */
 void print_matrix(matrix_T *m) {
-  assert(m != NULL);
+  if (m == NULL) {
+    fprintf(stderr, "Cannot print null matrix\n");
+    return;
+  }
   printf("Matrix: %d x %d:\n", m->rows, m->cols);
   vector_T *ov = m->vals;
 
@@ -153,6 +178,10 @@ void print_matrix(matrix_T *m) {
 
 /* frees a vector */
 void free_vector(vector_T *v) {
+  if (v == NULL) {
+    fprintf(stderr, "Cannot free null vector\n");
+    return;
+  }
   free(v->nums);
   free(v);
 }
@@ -160,7 +189,9 @@ void free_vector(vector_T *v) {
 
 /* prints a vector to stdout */
 void print_vector(vector_T *v) {
-  assert(v != NULL);
+  if (v == NULL) {
+    fprintf(stderr, "Cannot print null vector\n");
+  }
   printf("Vector of size: %d\n", v->size);
   for (int i = 0; i < v->size; i++) {
     printf("%.5f\n", v->nums[i]);
@@ -171,7 +202,10 @@ void print_vector(vector_T *v) {
 
 
 matrix_T *matrix_add(matrix_T *a, matrix_T *b) {
-  assert(a != NULL && b != NULL);
+  if (a == NULL || b == NULL) {
+    fprintf(stderr, "NULL mtarix in matrix add\n");
+    return NULL;
+  }
 
   if (a->cols != b->cols || a->rows != b->rows) {
     fprintf(stderr, "Incorrect dimensions in matrix_add\n");
@@ -192,7 +226,10 @@ matrix_T *matrix_add(matrix_T *a, matrix_T *b) {
 }
 
 matrix_T *matrix_mult_c(matrix_T *a, int c) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL matrix in matrix mult c\n");
+    return NULL;
+  }
 
   int size = a->vals->size;
   double *val = malloc(sizeof(double) * size);
@@ -208,7 +245,10 @@ matrix_T *matrix_mult_c(matrix_T *a, int c) {
 
 
 matrix_T *matrix_mult(matrix_T *a, matrix_T *b) {
-  assert(a != NULL && b != NULL);
+  if (a == NULL || b == NULL) {
+    fprintf(stderr, "NULL matrix in matrix mult\n");
+    return NULL;
+  }
 
   if (a->cols != b->rows) {
     fprintf(stderr, "Invalid dimensions in matrix_mult\n");
@@ -246,7 +286,10 @@ matrix_T *matrix_mult(matrix_T *a, matrix_T *b) {
 }
 
 matrix_T *transpose(matrix_T *a) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL matrix in transpose\n");
+    return NULL;
+  }
 
   if (a->vals == NULL) {
     fprintf(stderr, "NULL vector in transpose\n");
@@ -278,10 +321,22 @@ matrix_T *transpose(matrix_T *a) {
 
 
 reduction_T *row_reduce(matrix_T *a) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL matrix in row_reduce\n");
+  }
 
   int sign = 1;
   bool is_swapped = false;
+  int num_swaps = 0;
+  int actual_swaps = 0;
+
+  /* the maximum number of swaps using this method is the minimum of the dimensions */
+  if (a->rows > a->cols) {
+    num_swaps = a->cols;
+  }
+  else {
+    num_swaps = a->rows;
+  }
 
   reduction_T *reduction_info = malloc(sizeof(reduction_T));
   int num_ks = 0;
@@ -292,6 +347,13 @@ reduction_T *row_reduce(matrix_T *a) {
 
   reduction_info->ks = malloc(sizeof(double) * num_ks);
   int index_k = 0;
+
+  reduction_info->swaps = malloc(sizeof(int) * num_swaps);
+  for (int i = 0; i < num_swaps; i++) {
+    reduction_info->swaps[i] = -1;
+  }
+  int swap_index = 0;
+
 
 
   /* create an array of pointers to hold all the row vectors */
@@ -347,6 +409,9 @@ reduction_T *row_reduce(matrix_T *a) {
       rows[index] = temp;
       sign *= -1;
       is_swapped = true;
+      reduction_info->swaps[swap_index++] = num_pivots;
+      reduction_info->swaps[swap_index++] = index;
+      actual_swaps++;
     }
 
     /* now we can just row reduce below the pivot */
@@ -408,12 +473,16 @@ reduction_T *row_reduce(matrix_T *a) {
   reduction_info->sign = sign;
   reduction_info->num_ks = index_k;
   reduction_info->swapped = is_swapped;
+  reduction_info->num_swaps = actual_swaps;
 
   return reduction_info;
 }
 
 double determinant(matrix_T *a) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL matrix in determinant\n");
+    return ERROR;
+  }
   if (a->cols != a->rows) {
     fprintf(stderr, "Cannot perform determinant on non square matrix\n");
     return 0;
@@ -435,13 +504,15 @@ double determinant(matrix_T *a) {
 }
 
 lu_decomposition_T *lu_decomposition(matrix_T *a) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL matrix in lu_decomposition\n");
+    return NULL;
+  }
 
   reduction_T *red_info = row_reduce(a);
 
   if (red_info->swapped) {
-    fprintf(stderr, "A pure LU decomposition doesn't exist\n");
-    return NULL;
+    fprintf(stdout, "A pure LU decomposition doesn't exist, check the P matrix!\n");
   }
 
   lu_decomposition_T *sol = malloc(sizeof(lu_decomposition_T));
@@ -466,20 +537,62 @@ lu_decomposition_T *lu_decomposition(matrix_T *a) {
       k_index++;
     }
   }
+
+
+  
+  /* now calculate the P matrix */
+  matrix_T *identity = create_identity_matrix(a->rows);
+
+  for (int i = 0; i < red_info->num_swaps; i++) {
+    swap(identity, red_info->swaps[2*i], red_info->swaps[2*i+1]);
+  }
+
   vector_T *vec = create_vector(a->rows * a->rows, vals);
   matrix_T *lower = create_matrix(a->rows, a->rows, vec);
   sol->lower = lower;
+  sol->P = identity;
+
   free(red_info->ks);
+  free(red_info->swaps);
   free(red_info);
   return sol;
 }
 
+void swap(matrix_T *i, int row1, int row2) {
+  int row_index1 = i->cols*row1;
+  int row_index2 = i->cols*row2;
+
+  int offset1 = 0;
+  int offset2 = 0;
+
+  //change the first row
+  while (i->vals->nums[row_index1] != 1) {
+    row_index1++;
+    offset1++;
+  }
+
+  while (i->vals->nums[row_index2] != 1) {
+    row_index2++;
+    offset2++;
+  }
+
+  i->vals->nums[row_index1] = 0;
+  i->vals->nums[row_index2] = 0;
+  i->vals->nums[i->cols * row1 + offset2] = 1;
+  i->vals->nums[i->cols * row2 + offset1] = 1;
+}
+
 void print_lu(lu_decomposition_T *a) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL matrix in print_lu\n");
+    return;
+  }
   printf("Lower:\n");
   print_matrix(a->lower);
   printf("Upper:\n");
   print_matrix(a->upper);
+  printf("P Matrix:\n");
+  print_matrix(a->P);
 }
 
 
@@ -488,7 +601,10 @@ void print_lu(lu_decomposition_T *a) {
 /* basic vector functions below */
 
 vector_T *vector_add(vector_T *a, vector_T *b) {
-  assert(a != NULL & b != NULL);
+  if (a == NULL || b == NULL) {
+    fprintf(stderr, "NULL vector in vector_add\n");
+    return NULL;
+  }
   if (a->size != b->size) {
     fprintf(stderr, "Vectors not of the same size in vector_add!\n");
     return NULL;
@@ -506,7 +622,10 @@ vector_T *vector_add(vector_T *a, vector_T *b) {
 
 
 vector_T *vector_mult_c(vector_T *a, double c) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL vector in vector mult c\n");
+    return NULL;
+  } 
   
   double *vals = malloc(sizeof(double) * a->size);
 
@@ -520,7 +639,10 @@ vector_T *vector_mult_c(vector_T *a, double c) {
 
 
 double magnitude(vector_T *a) {
-  assert(a != NULL);
+  if (a == NULL) {
+    fprintf(stderr, "NULL vector in magnitude\n");
+    return ERROR;
+  }
   double sum = 0;
   for (int i = 0; i < a->size; i++) {
     sum += a->nums[i] * a->nums[i];
