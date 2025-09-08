@@ -1,4 +1,4 @@
-<h1> C-Lin-Alg: Linear Algebra implemented in C</h1>
+<h1> C-Lint: Linear Algebra implemented in C</h1>
 <p> C-Lin-Alg was created (for fun) as a library for C. </p>
 <h2>Basic Instructions</h2>
 <p>Testing can be done via src/main.c. Run <code>make</code> to compile and link the files with main.c. Run <code>make clean</code> to remove unwanted object files as well as the executable. A sample input is
